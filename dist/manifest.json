@@ -8,6 +8,14 @@
     "overview": "A YouTube-style home feed for Jellyfin",
     "versions": [
       {
+        "version": "1.1.0.0",
+        "changelog": "Add YouTube Home to the Jellyfin Web sidebar by default, with a dedicated feed route that remains available when home-page replacement is disabled.",
+        "targetAbi": "10.10.7.0",
+        "sourceUrl": "https://github.com/mmahmoodictbd/yellyfin/releases/download/v1.1.0/youtubehome_1.1.0.zip",
+        "checksum": "e50e60feb5209fccfdd846d51aefdbf8",
+        "timestamp": "2026-10-01T13:48:23Z"
+      },
+      {
         "version": "1.0.0.0",
         "changelog": "Initial release",
         "targetAbi": "10.10.7.0",
