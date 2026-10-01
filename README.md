@@ -82,6 +82,25 @@ The server plugin supplies the feed API and serves its browser script at `/YouTu
 <script src="/YouTubeHome/client.js"></script>
 ```
 
+Installing from the plugin repository does not inject this tag because Jellyfin plugins cannot modify the separately installed web client.
+
+For a Debian or Ubuntu Proxmox LXC, run these commands inside the container:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/mmahmoodictbd/yellyfin/main/inject-web.sh
+chmod +x inject-web.sh
+sudo ./inject-web.sh
+sudo systemctl restart jellyfin
+```
+
+The helper defaults to `/usr/share/jellyfin/web/index.html`, creates `index.html.youtubehome.bak`, and is safe to run more than once. Pass a different web root as its first argument when needed.
+
+Verify the injection from another machine:
+
+```sh
+curl -fsS http://JELLYFIN-IP:8096/web/index.html | grep '/YouTubeHome/client.js'
+```
+
 Restart Jellyfin and hard-refresh the browser after editing the file. Jellyfin upgrades may replace `index.html`, so the script tag may need to be added again. This injection affects only that hosted web client; native Jellyfin applications do not load the custom script.
 
 For Docker, make the change in a derived image or startup script instead of editing the running container, because container changes are lost when it is recreated.
