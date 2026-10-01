@@ -93,7 +93,7 @@ sudo ./inject-web.sh
 sudo systemctl restart jellyfin
 ```
 
-The helper defaults to `/usr/share/jellyfin/web/index.html`, creates `index.html.youtubehome.bak`, and is safe to run more than once. Pass a different web root as its first argument when needed.
+The helper defaults to `/usr/share/jellyfin/web/index.html`, creates `index.html.youtubehome.bak`, and is safe to run more than once. Rerunning it replaces the existing tag with a cache-busted URL so browsers load the client script from the newly installed plugin release. Pass a different web root as its first argument when needed.
 
 Verify the injection from another machine:
 

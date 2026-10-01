@@ -5,7 +5,8 @@ set -euo pipefail
 WEB_ROOT="${1:-/usr/share/jellyfin/web}"
 INDEX_FILE="$WEB_ROOT/index.html"
 BACKUP_FILE="$INDEX_FILE.youtubehome.bak"
-SCRIPT_TAG='<script src="/YouTubeHome/client.js"></script>'
+CACHE_BUSTER="$(date +%s)"
+SCRIPT_TAG="<script src=\"/YouTubeHome/client.js?v=$CACHE_BUSTER\"></script>"
 
 [[ -f "$INDEX_FILE" ]] || {
     echo "error: Jellyfin web index not found at $INDEX_FILE" >&2
@@ -17,11 +18,6 @@ SCRIPT_TAG='<script src="/YouTubeHome/client.js"></script>'
     exit 1
 }
 
-if grep -Fq "$SCRIPT_TAG" "$INDEX_FILE"; then
-    echo "YouTubeHome is already injected into $INDEX_FILE"
-    exit 0
-fi
-
 grep -Fq '</body>' "$INDEX_FILE" || {
     echo "error: $INDEX_FILE does not contain a closing body tag" >&2
     exit 1
@@ -30,7 +26,8 @@ grep -Fq '</body>' "$INDEX_FILE" || {
 [[ -f "$BACKUP_FILE" ]] || cp -p "$INDEX_FILE" "$BACKUP_FILE"
 TEMP_FILE="$(mktemp)"
 trap 'rm -f "$TEMP_FILE"' EXIT
-sed "s#</body>#$SCRIPT_TAG</body>#" "$INDEX_FILE" > "$TEMP_FILE"
+sed -E 's#<script src="/YouTubeHome/client\.js(\?v=[^"]*)?"></script>##g' "$INDEX_FILE" \
+    | sed "s#</body>#$SCRIPT_TAG</body>#" > "$TEMP_FILE"
 cat "$TEMP_FILE" > "$INDEX_FILE"
 
 grep -Fq "$SCRIPT_TAG" "$INDEX_FILE" || {
@@ -38,5 +35,5 @@ grep -Fq "$SCRIPT_TAG" "$INDEX_FILE" || {
     exit 1
 }
 
-echo "Injected YouTubeHome into $INDEX_FILE"
+echo "Refreshed YouTubeHome in $INDEX_FILE"
 echo "Backup: $BACKUP_FILE"
