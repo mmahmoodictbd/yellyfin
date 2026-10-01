@@ -36,7 +36,7 @@ Jellyfin repository installation requires the ZIP and `manifest.json` to be avai
 2. Build with your GitHub repository name:
 
 	```sh
-	GITHUB_REPOSITORY=OWNER/REPOSITORY ./build.sh
+	GITHUB_REPOSITORY=mmahmoodictbd/yellyfin ./build.sh
 	```
 
 3. Commit and push `dist/manifest.json`.
@@ -45,7 +45,7 @@ Jellyfin repository installation requires the ZIP and `manifest.json` to be avai
 
 	```text
 	Repository name: YouTubeHome
-	Repository URL:  https://raw.githubusercontent.com/OWNER/REPOSITORY/main/dist/manifest.json
+	Repository URL:  https://raw.githubusercontent.com/mmahmoodictbd/yellyfin/main/dist/manifest.json
 	```
 
 6. Save, open **Catalog**, select **YouTubeHome**, and install it.
