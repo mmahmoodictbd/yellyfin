@@ -4,6 +4,10 @@ YouTubeHome is a Jellyfin server plugin that turns selected video libraries into
 
 **Latest release:** [YouTubeHome 1.1.0](https://github.com/mmahmoodictbd/yellyfin/releases/tag/v1.1.0)
 
+![YouTubeHome sidebar and feed preview](docs/youtube-home-preview.png)
+
+_Illustrative preview; titles and artwork come from your own Jellyfin libraries._
+
 ## Compatibility
 
 - Jellyfin Server 10.9 or 10.10
