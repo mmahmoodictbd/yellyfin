@@ -2,6 +2,8 @@
 
 YouTubeHome is a Jellyfin server plugin that turns selected video libraries into a YouTube-style home feed. It adds shuffled recommendations, recently added videos, and rows grouped by channel folder while respecting each user's Jellyfin library access and parental controls.
 
+**Latest release:** [YouTubeHome 1.0.0](https://github.com/mmahmoodictbd/yellyfin/releases/tag/v1.0.0)
+
 ## Compatibility
 
 - Jellyfin Server 10.9 or 10.10
@@ -30,28 +32,27 @@ Pass a different build configuration as the first argument, for example `./build
 
 ## Install from a repository
 
-Jellyfin repository installation requires the ZIP and `manifest.json` to be available at public URLs. GitHub Releases can host the ZIP while the repository itself hosts the manifest.
-
-1. Create a public GitHub repository and push this project to its `main` branch.
-2. Build with your GitHub repository name:
-
-	```sh
-	GITHUB_REPOSITORY=mmahmoodictbd/yellyfin ./build.sh
-	```
-
-3. Commit and push `dist/manifest.json`.
-4. Create a GitHub release tagged `v1.0.0` and upload `dist/youtubehome_1.0.0.zip` as a release asset. The tag and filename must match the generated manifest.
-5. In Jellyfin, open **Dashboard > Plugins > Repositories** and add:
+1. In Jellyfin, open **Dashboard > Plugins > Repositories** and add:
 
 	```text
 	Repository name: YouTubeHome
 	Repository URL:  https://raw.githubusercontent.com/mmahmoodictbd/yellyfin/main/dist/manifest.json
 	```
 
-6. Save, open **Catalog**, select **YouTubeHome**, and install it.
-7. Restart Jellyfin, then configure the plugin under **Dashboard > Plugins > YouTubeHome**.
+2. Save, open **Catalog**, select **YouTubeHome**, and install it.
+3. Restart Jellyfin, then configure the plugin under **Dashboard > Plugins > YouTubeHome**.
 
-The manifest checksum is generated in Jellyfin's required MD5 format. The separate `.sha256` file remains available for manually verifying the release download. For later releases, update `Version`, `AssemblyVersion`, and `FileVersion` in the project, then build and publish with the matching `vVERSION` release tag. Keep older version entries in the manifest if users must be able to install them.
+The latest package can also be downloaded directly from [GitHub Releases](https://github.com/mmahmoodictbd/yellyfin/releases/latest).
+
+## Create a release
+
+Maintainers must first update `Version`, `AssemblyVersion`, and `FileVersion` in `Jellyfin.Plugin.YouTubeHome.csproj`, then commit and push that change to `main`. Create the release with:
+
+```sh
+./release.sh "Summary of changes"
+```
+
+The script requires `dotnet`, `git`, `gh`, and `jq`. It refuses to release from a dirty, non-`main`, unsynchronized, or already-tagged checkout. It builds the ZIP, prepends the new entry while preserving older manifest versions, commits the manifest, pushes the release tag, and uploads the ZIP and SHA-256 checksum to GitHub Releases. Jellyfin's required MD5 checksum is stored in the manifest.
 
 ## Install
 

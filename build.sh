@@ -35,7 +35,7 @@ dotnet build "$PROJECT" \
     --output "$BUILD_DIR"
 
 cp "$BUILD_DIR/$ASSEMBLY_NAME.dll" "$STAGE_DIR/"
-rm -f "$ZIP_PATH" "$ZIP_PATH.sha256" "$DIST_DIR/manifest.json"
+rm -f "$ZIP_PATH" "$ZIP_PATH.sha256"
 (
     cd "$STAGE_DIR"
     zip -q "$ZIP_PATH" "$ASSEMBLY_NAME.dll"
@@ -65,33 +65,54 @@ if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
         exit 1
     fi
 
+    command -v jq >/dev/null 2>&1 || {
+        echo "error: jq is required to generate manifest.json" >&2
+        exit 1
+    }
+
     RELEASE_TAG="${RELEASE_TAG:-v$VERSION}"
     SOURCE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$PACKAGE_NAME.zip"
     TIMESTAMP="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    CHANGELOG="${CHANGELOG:-Release $VERSION}"
+    MANIFEST_PATH="$DIST_DIR/manifest.json"
+    NEW_MANIFEST="$DIST_DIR/manifest.json.new"
 
-    cat > "$DIST_DIR/manifest.json" <<EOF
-[
-  {
-    "category": "General",
-    "guid": "6d8c1e52-3f0a-4b57-9c1d-2a7e5b9f4c10",
-    "name": "YouTubeHome",
-    "description": "Turns selected libraries into a YouTube-style home feed with shuffled recommendations, channel rows, and recent uploads.",
-    "owner": "${GITHUB_REPOSITORY%%/*}",
-    "overview": "A YouTube-style home feed for Jellyfin",
-    "versions": [
-      {
-        "version": "$ASSEMBLY_VERSION",
-        "changelog": "Initial release",
-        "targetAbi": "10.10.7.0",
-        "sourceUrl": "$SOURCE_URL",
-        "checksum": "$JELLYFIN_CHECKSUM",
-        "timestamp": "$TIMESTAMP"
-      }
-    ]
-  }
-]
-EOF
-    echo "Created $DIST_DIR/manifest.json"
+    jq -n \
+        --arg owner "${GITHUB_REPOSITORY%%/*}" \
+        --arg version "$ASSEMBLY_VERSION" \
+        --arg changelog "$CHANGELOG" \
+        --arg sourceUrl "$SOURCE_URL" \
+        --arg checksum "$JELLYFIN_CHECKSUM" \
+        --arg timestamp "$TIMESTAMP" \
+        '[{
+            category: "General",
+            guid: "6d8c1e52-3f0a-4b57-9c1d-2a7e5b9f4c10",
+            name: "YouTubeHome",
+            description: "Turns selected libraries into a YouTube-style home feed with shuffled recommendations, channel rows, and recent uploads.",
+            owner: $owner,
+            overview: "A YouTube-style home feed for Jellyfin",
+            versions: [{
+                version: $version,
+                changelog: $changelog,
+                targetAbi: "10.10.7.0",
+                sourceUrl: $sourceUrl,
+                checksum: $checksum,
+                timestamp: $timestamp
+            }]
+        }]' > "$NEW_MANIFEST"
+
+    if [[ -f "$MANIFEST_PATH" ]]; then
+        jq --slurpfile existing "$MANIFEST_PATH" \
+            '.[0].versions[0].version as $version
+             | .[0].versions += ($existing[0][0].versions | map(select(.version != $version)))' \
+            "$NEW_MANIFEST" > "$NEW_MANIFEST.merged"
+        mv "$NEW_MANIFEST.merged" "$MANIFEST_PATH"
+        rm "$NEW_MANIFEST"
+    else
+        mv "$NEW_MANIFEST" "$MANIFEST_PATH"
+    fi
+
+    echo "Created $MANIFEST_PATH"
 else
     echo "Set GITHUB_REPOSITORY=owner/repository to also create dist/manifest.json"
 fi
