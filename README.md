@@ -2,7 +2,7 @@
 
 YouTubeHome is a Jellyfin server plugin that turns selected video libraries into a YouTube-style home feed. It adds shuffled recommendations, recently added videos, and rows grouped by channel folder while respecting each user's Jellyfin library access and parental controls.
 
-**Latest release:** [YouTubeHome 1.0.0](https://github.com/mmahmoodictbd/yellyfin/releases/tag/v1.0.0)
+**Latest release:** [YouTubeHome 1.1.0](https://github.com/mmahmoodictbd/yellyfin/releases/tag/v1.1.0)
 
 ## Compatibility
 
@@ -107,12 +107,13 @@ For Docker, make the change in a derived image or startup script instead of edit
 
 ## Feed behavior
 
+- **YouTube Home** appears in the normal Jellyfin Web sidebar and opens the feed on its own route.
 - **Recommended** contains a shuffled selection from the configured candidate pool.
 - **Recently added** is ordered by Jellyfin's item creation date.
 - **From channel** rows group videos by their immediate parent folder.
 - Watched state, playback progress, metadata, and image URLs come from Jellyfin's standard item DTOs.
 
-Disabling **Replace the default home screen** leaves the API active without changing the home page. The client also exposes `window.YouTubeHome.mount(element)` for mounting the feed in a custom web-client page.
+Disabling **Replace the default home screen** keeps the sidebar feed available without changing Jellyfin's standard home page. The client also exposes `window.YouTubeHome.mount(element)` for mounting the feed in a custom web-client page.
 
 ## Uninstall
 

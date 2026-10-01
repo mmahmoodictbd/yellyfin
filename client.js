@@ -11,6 +11,7 @@
     'use strict';
 
     var ROOT_ID = 'yth-root';
+    var MENU_ID = 'yth-menu-option';
     var BODY_CLASS = 'yth-active';
     var cfg = null;
     var loading = false;
@@ -115,6 +116,45 @@
         });
     }
 
+    function isYouTubeHome() {
+        return /^#\/home(?:\.html)?\?[^#]*youtubehome=1(?:&|$)/.test(location.hash);
+    }
+
+    function ensureSidebarLink() {
+        var host = document.querySelector('.customMenuOptions');
+        if (!host) { return; }
+
+        var link = document.getElementById(MENU_ID);
+        if (cfg && cfg.Enabled && !link) {
+            var homeLink = document.querySelector('.navMenuOption[href="#/home.html"]');
+            link = homeLink ? homeLink.cloneNode(true) : document.createElement('a');
+            link.id = MENU_ID;
+            link.className = 'navMenuOption lnkMediaFolder';
+            link.href = '#/home.html?youtubehome=1';
+            link.setAttribute('aria-label', 'YouTube Home');
+
+            var icon = link.querySelector('.navMenuOptionIcon') || document.createElement('span');
+            icon.className = 'material-icons navMenuOptionIcon ondemand_video';
+            icon.setAttribute('aria-hidden', 'true');
+
+            var label = link.querySelector('.navMenuOptionText') || document.createElement('span');
+            label.className = 'navMenuOptionText';
+            label.textContent = 'YouTube Home';
+
+            link.innerHTML = '';
+            link.appendChild(icon);
+            link.appendChild(label);
+            host.appendChild(link);
+        } else if ((!cfg || !cfg.Enabled) && link) {
+            link.remove();
+            return;
+        }
+
+        if (link) {
+            link.classList.toggle('navMenuOption-selected', isYouTubeHome());
+        }
+    }
+
     // ---------- mounting ----------
     function mount() {
         var page = document.querySelector('#indexPage');
@@ -146,7 +186,8 @@
     function refresh() {
         if (!window.ApiClient || !ApiClient.accessToken()) { return; }  // not logged in yet
         var go = function () {
-            if (cfg && cfg.Enabled && cfg.ReplaceHomePage && isHome()) { mount(); } else { unmount(); }
+            ensureSidebarLink();
+            if (cfg && cfg.Enabled && (isYouTubeHome() || (cfg.ReplaceHomePage && isHome()))) { mount(); } else { unmount(); }
         };
         if (cfg) { go(); return; }
         ApiClient.getJSON(ApiClient.getUrl('YouTubeHome/Config'))
@@ -157,6 +198,19 @@
     // Re-run on every SPA view change; the shuffle is re-rolled each time the home view is shown.
     document.addEventListener('viewshow', function () { refresh(); });
     window.addEventListener('hashchange', function () { refresh(); });
+
+    // Jellyfin rebuilds the drawer after login and server changes. Restore our item each time.
+    new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            for (var j = 0; j < mutations[i].addedNodes.length; j++) {
+                var node = mutations[i].addedNodes[j];
+                if (node.nodeType === 1 && (node.matches('.customMenuOptions') || node.querySelector('.customMenuOptions'))) {
+                    ensureSidebarLink();
+                    return;
+                }
+            }
+        }
+    }).observe(document.documentElement, { childList: true, subtree: true });
 
     // Manual hook if you prefer a custom tab / page: YouTubeHome.mount(containerElement)
     window.YouTubeHome = {
