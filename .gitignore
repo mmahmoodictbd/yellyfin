@@ -1,7 +1,8 @@
 bin/
 obj/
 artifacts/
-dist/
+dist/*
+!dist/manifest.json
 
 .DS_Store
 *.user
