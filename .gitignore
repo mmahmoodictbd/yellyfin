@@ -1,0 +1,11 @@
+bin/
+obj/
+artifacts/
+dist/
+
+.DS_Store
+*.user
+*.suo
+*.swp
+.vs/
+.vscode/

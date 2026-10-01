@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Jellyfin 10.9 / 10.10 => net8.0.  Jellyfin 10.11+ => net9.0 and Jellyfin.Controller 10.11.* -->
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Jellyfin.Plugin.YouTubeHome</RootNamespace>
+    <AssemblyName>Jellyfin.Plugin.YouTubeHome</AssemblyName>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ExcludeAssets=runtime: Jellyfin already ships these assemblies, don't copy them next to our DLL. -->
+    <PackageReference Include="Jellyfin.Controller" Version="10.10.7">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embedded so the single DLL is the whole plugin. -->
+    <EmbeddedResource Include="configPage.html" LogicalName="Jellyfin.Plugin.YouTubeHome.Configuration.configPage.html" />
+    <EmbeddedResource Include="client.js" LogicalName="Jellyfin.Plugin.YouTubeHome.Web.client.js" />
+  </ItemGroup>
+
+</Project>
