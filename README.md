@@ -24,8 +24,8 @@ chmod +x build.sh
 The script restores dependencies, builds the plugin in Release mode, and creates:
 
 ```text
-dist/youtubehome_1.0.0.zip
-dist/youtubehome_1.0.0.zip.sha256
+dist/youtubehome_1.1.0.zip
+dist/youtubehome_1.1.0.zip.sha256
 ```
 
 Pass a different build configuration as the first argument, for example `./build.sh Debug`.
@@ -43,6 +43,24 @@ Pass a different build configuration as the first argument, for example `./build
 3. Restart Jellyfin, then configure the plugin under **Dashboard > Plugins > YouTubeHome**.
 
 The latest package can also be downloaded directly from [GitHub Releases](https://github.com/mmahmoodictbd/yellyfin/releases/latest).
+
+### Upgrade
+
+The sidebar was added in version 1.1.0. Updating `index.html` alone is not enough; Jellyfin must activate the new plugin DLL first.
+
+1. Open **Dashboard > Plugins > Catalog > YouTubeHome** and install the latest version.
+2. Restart Jellyfin and confirm **Dashboard > Plugins > My Plugins > YouTubeHome** shows version `1.1.0.0` or later.
+3. Rerun `inject-web.sh` to replace the script tag with a cache-busted URL.
+4. Restart Jellyfin, then hard-refresh or clear the site data in the browser.
+
+For a Proxmox LXC:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/mmahmoodictbd/yellyfin/main/inject-web.sh
+chmod +x inject-web.sh
+sudo ./inject-web.sh
+sudo systemctl restart jellyfin
+```
 
 ## Create a release
 
@@ -101,6 +119,14 @@ Verify the injection from another machine:
 curl -fsS http://JELLYFIN-IP:8096/web/index.html | grep '/YouTubeHome/client.js'
 ```
 
+Verify that Jellyfin is serving the sidebar-enabled client script from plugin version 1.1.0 or later:
+
+```sh
+curl -fsS http://JELLYFIN-IP:8096/YouTubeHome/client.js | grep 'yth-menu-option'
+```
+
+If the first command succeeds but the second prints nothing, the HTML injection is correct but Jellyfin is still running an older plugin DLL. Update the plugin through the catalog and restart Jellyfin before rerunning the injection helper.
+
 Restart Jellyfin and hard-refresh the browser after editing the file. Jellyfin upgrades may replace `index.html`, so the script tag may need to be added again. This injection affects only that hosted web client; native Jellyfin applications do not load the custom script.
 
 For Docker, make the change in a derived image or startup script instead of editing the running container, because container changes are lost when it is recreated.
@@ -114,6 +140,8 @@ For Docker, make the change in a derived image or startup script instead of edit
 - Watched state, playback progress, metadata, and image URLs come from Jellyfin's standard item DTOs.
 
 Disabling **Replace the default home screen** keeps the sidebar feed available without changing Jellyfin's standard home page. The client also exposes `window.YouTubeHome.mount(element)` for mounting the feed in a custom web-client page.
+
+The sidebar item is supported by the server-hosted Jellyfin Web client. The stock Android app uses its own bundled client and does not load this customization; use Jellyfin Web in the Android browser or install it as a PWA.
 
 ## Uninstall
 
